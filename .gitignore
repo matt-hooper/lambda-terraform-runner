@@ -1,3 +1,16 @@
+# zip files
+**/files/*
+
+# layers
+**/layers/terraform/terraform_*/*
+
+# terraform
+**/*.tfvars
+**/*.tfplan
+**/*.tfstate*
+**/*secret*
+.terraform
+
 # Logs
 logs
 *.log

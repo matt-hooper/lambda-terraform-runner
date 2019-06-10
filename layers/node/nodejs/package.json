@@ -1,0 +1,21 @@
+{
+  "name": "terraform-apply-lambda",
+  "version": "0.0.1",
+  "description": "run terraform apply/destroy from a lambda",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "keywords": [
+    "terraform",
+    "lambda",
+    "node"
+  ],
+  "author": "matt-hooper",
+  "license": "ISC",
+  "dependencies": {
+    "extract-zip": "^1.6.7",
+    "shelljs": "^0.8.3"
+  }
+}
