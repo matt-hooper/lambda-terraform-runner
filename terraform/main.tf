@@ -70,8 +70,12 @@ resource "aws_lambda_layer_version" "terraform_layer" {
   compatible_runtimes = ["nodejs8.10", "nodejs10.x"]
 }
 
-data "aws_iam_role" "lambda-iam_role" {
-  name = "lambda-s3-role"
+# data "aws_iam_role" "lambda-iam_role" {
+#   name = "lambda-s3-role"
+# }
+
+module "lambda-iam_role" {
+  source = "./role"
 }
 
 resource "aws_lambda_function" "lambda" {
@@ -81,7 +85,7 @@ resource "aws_lambda_function" "lambda" {
   s3_key           = "${aws_s3_bucket_object.lambda-archive-s3-object.key}"
   source_code_hash = "${data.archive_file.lambda-archive.output_base64sha256}"
 
-  role        = "${data.aws_iam_role.lambda-iam_role.arn}"
+  role        = "${module.lambda-iam_role.role-arn}"
   handler     = "${var.lambda-handler}.handler"
   runtime     = "nodejs10.x"
   description = "Terraform runner"
