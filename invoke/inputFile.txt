@@ -1,0 +1,5 @@
+{
+  "action": "apply",
+  "script_key": "rabbit-mq-cluster",
+  "dependencies": ["shared-modules","rabbit-mq-brokers"]
+}
