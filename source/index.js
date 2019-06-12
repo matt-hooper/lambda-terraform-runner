@@ -5,8 +5,7 @@ const extract = require('extract-zip');
 
 const TERRAFORM_APP_LAYER_LOC = '/opt/terraform_app/terraform';
 const TERRAFORM = '/tmp/terraform';
-const TERRAFORM_PLUGIN_LAYER_LOC = '/opt/terraform_plugin/.terraform/plugins/linux_amd64';
-const TERRAFORM_PLUGIN = '/tmp/linux_amd64';
+const TERRAFORM_PLUGIN_LAYER_LOC = '/opt/terraform_plugin/.terraform';
 const SHARED_MODULES_KEY = 'shared-modules';
 
 
@@ -14,11 +13,14 @@ const SHARED_MODULES_KEY = 'shared-modules';
 const s3 = new AWS.S3();
 
 // setup terraform 
-const setupTerraform = () => {
+const setupTerraform = (main_script) => {
+    const start_location = `/tmp/${main_script}`;
+    
+    sh.exec(`mkdir ${start_location}`);
     sh.exec(`cp ${TERRAFORM_APP_LAYER_LOC} ${TERRAFORM}`);
-    sh.exec(`cp -r ${TERRAFORM_PLUGIN_LAYER_LOC} ${TERRAFORM_PLUGIN}`);
+    sh.exec(`cp -r ${TERRAFORM_PLUGIN_LAYER_LOC} ${start_location}`);
     sh.exec(`chmod +x ${TERRAFORM}`);
-    sh.exec(`chmod -R +x ${TERRAFORM_PLUGIN}`);
+    sh.exec(`chmod -R +x ${start_location}`);
     console.log(sh.exec(`${TERRAFORM} -version`, {silent:true}).stdout);
 }
 
@@ -78,7 +80,7 @@ exports.handler = async (event, context) => {
     
     console.log(`Action: ${action}. Script: ${script_key}. Workspace: ${workspace}. Dependencies: ${dependencies}`);
     
-    setupTerraform();
+    setupTerraform(script_key);
 
     await Promise.all(dependencies.map(async (dependency) => {
         // download dependency
