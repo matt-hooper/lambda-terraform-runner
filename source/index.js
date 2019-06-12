@@ -60,7 +60,8 @@ const writeAndUnpackFile = async (data, file_key) => {
 const runTerraform = (action, workspace, script_key) => {
     
     sh.cd(`/tmp/${script_key}`);
-    sh.exec(`${TERRAFORM} init -input=false -force-copy -plugin-dir=${TERRAFORM_PLUGIN}`);
+    //sh.exec(`${TERRAFORM} init -input=false -force-copy -plugin-dir=${TERRAFORM_PLUGIN}`);
+    sh.exec(`${TERRAFORM} init -input=false -force-copy`);
     sh.exec(`${TERRAFORM} workspace select ${workspace} || ${TERRAFORM} workspace new ${workspace}`);
     sh.exec(`${TERRAFORM} ${action} -auto-approve -lock=false`);
  }
@@ -68,18 +69,22 @@ const runTerraform = (action, workspace, script_key) => {
 exports.handler = async (event, context) => {
     
     const action = event.action || 'apply';
+    const dependencies = event.dependencies || [SHARED_MODULES_KEY];
     const script_key = event.script_key || 'simple';
-    const workspace = event.workspace || 'lambda';
+    const workspace = process.env.WORKSPACE || 'lambda';
     const bucket = event.bucket_name || 'dec-mhooper-terraform-scripts';
     
     let scriptCount = 0;
     
-    console.log(`Action: ${action}. Script: ${script_key}. Workspace: ${workspace}`);
+    console.log(`Action: ${action}. Script: ${script_key}. Workspace: ${workspace}. Dependencies: ${dependencies}`);
     
     setupTerraform();
-    
-    // download shared modules
-    await downloadZipFromS3AndUnPack(bucket, workspace, SHARED_MODULES_KEY);
+
+    await Promise.all(dependencies.map(async (dependency) => {
+        // download dependency
+        await downloadZipFromS3AndUnPack(bucket, workspace, dependency);        
+        console.log(dependency);
+    }));    
     
     // download target script
     await downloadZipFromS3AndUnPack(bucket, workspace, script_key);
