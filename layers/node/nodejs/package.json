@@ -16,6 +16,6 @@
   "license": "ISC",
   "dependencies": {
     "extract-zip": "^1.6.7",
-    "shelljs": "^0.8.3"
+    "shelljs": "^0.8.5"
   }
 }
